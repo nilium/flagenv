@@ -1,7 +1,6 @@
 package flagenv
 
 import (
-	"path"
 	"strings"
 	"unicode"
 )
@@ -50,15 +49,6 @@ func SnakeCase(name string) string {
 		return m
 	}
 	return strings.Map(runeMap, name)
-}
-
-// PathLike is a KeyFunc that converts names to path/case (i.e., slash-separated). It does this by
-// splitting the input name on any non-alphanumeric and non-hyphen rune and rejoining them as
-// a slash-separated (/) path.
-func PathLike(name string) string {
-	return path.Join(strings.FieldsFunc(name, func(r rune) bool {
-		return !isAlnum(r) && r != '-'
-	})...)
 }
 
 // DotCase is a KeyFunc that converts names to dot.case (i.e., dot-separated). It does
