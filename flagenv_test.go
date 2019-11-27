@@ -2,9 +2,11 @@ package flagenv
 
 import (
 	"flag"
+	"fmt"
+	"io"
+	"reflect"
+	"strings"
 	"testing"
-
-	"github.com/google/go-cmp/cmp"
 )
 
 // Env is a map of strings to strings. It is intended for testing the LookupMapValue function.
@@ -28,6 +30,19 @@ func LogKeyAccess(t *testing.T, lookup LookupFunc) LookupFunc {
 		t.Logf("Accessed key: %q (err = %v)", key, err)
 		return v, err
 	}
+}
+
+func cmp(w io.Writer, field string, a, b interface{}) bool {
+	if field != "" {
+		field = field + " = "
+	}
+	if reflect.DeepEqual(a, b) {
+		_, _ = fmt.Fprintf(w, " %s%#+ v\n", field, b)
+		return true
+	}
+	_, _ = fmt.Fprintf(w, "-%s%#+ v\n", field, a)
+	_, _ = fmt.Fprintf(w, "+%s%#+ v\n", field, b)
+	return false
 }
 
 func TestLoader(t *testing.T) {
@@ -58,6 +73,18 @@ func TestLoader(t *testing.T) {
 		Bool bool
 		Str  string
 		Strs StringSlice
+	}
+
+	diff := func(a, b Flags) string {
+		var out strings.Builder
+		same := cmp(&out, "Int", a.Int, b.Int)
+		same = same && cmp(&out, "Bool", a.Bool, b.Bool)
+		same = same && cmp(&out, "Str", a.Str, b.Str)
+		same = same && cmp(&out, "Strs", a.Strs, b.Strs)
+		if same {
+			return ""
+		}
+		return out.String()
 	}
 
 	type Case struct {
@@ -151,7 +178,7 @@ func TestLoader(t *testing.T) {
 				Int:  256,
 				Bool: false,
 				Str:  "Foobar",
-				Strs: StringSlice{"1", "2", "x"},
+				Strs: StringSlice{"1", "2"},
 			},
 		},
 
@@ -218,8 +245,8 @@ func TestLoader(t *testing.T) {
 				t.Fatalf("Error setting flags: %v", err)
 			}
 
-			if diff := cmp.Diff(c.Want, got); diff != "" {
-				t.Fatalf("Loaded values differ from expected values (-want +got):\n%s", diff)
+			if result := diff(c.Want, got); result != "" {
+				t.Fatalf("Loaded values differ from expected values (-want +got):\n%s", result)
 			}
 		})
 	}
@@ -314,6 +341,14 @@ func TestCaseFuncs(t *testing.T) {
 		},
 	}
 
+	diff := func(a, b string) string {
+		var out strings.Builder
+		if cmp(&out, "", a, b) {
+			return ""
+		}
+		return out.String()
+	}
+
 	for _, c := range cases {
 		c := c
 		t.Run(c.Name, func(t *testing.T) {
@@ -321,8 +356,10 @@ func TestCaseFuncs(t *testing.T) {
 			for i, in := range c.In {
 				got[i] = c.Fn(in)
 			}
-			if diff := cmp.Diff(c.Want, got); diff != "" {
-				t.Fatalf("%s conversion produced unexpected results (-want +got):\n%s", c.Name, diff)
+			for i := range c.Want {
+				if result := diff(c.Want[i], got[i]); result != "" {
+					t.Fatalf("%s conversion produced unexpected results (-want +got):\n%s", c.Name, result)
+				}
 			}
 		})
 	}
