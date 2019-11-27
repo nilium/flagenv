@@ -9,6 +9,9 @@ import (
 // them to the keyfn.
 func WithPrefix(prefix string, keyfn KeyFunc) KeyFunc {
 	return func(key string) string {
+		if key == "" {
+			return ""
+		}
 		return keyfn(prefix + key)
 	}
 }
