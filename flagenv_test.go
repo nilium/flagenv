@@ -254,3 +254,76 @@ func TestSnakePrefix(t *testing.T) {
 		}
 	}
 }
+
+func TestCaseFuncs(t *testing.T) {
+	type Case struct {
+		Name string
+		Fn   KeyFunc
+		In   []string
+		Want []string
+	}
+
+	cases := []Case{
+		{
+			Name: "SnakeCase",
+			Fn:   SnakeCase,
+			In: []string{
+				"",
+				"_______*****()",
+				" Foo**Bar Baz___",
+				"foo_bar-baz",
+			},
+			Want: []string{
+				"",
+				"_",
+				"_Foo_Bar_Baz_",
+				"foo_bar_baz",
+			},
+		},
+		{
+			Name: "DotCase",
+			Fn:   DotCase,
+			In: []string{
+				"",
+				"_______*****()",
+				" Foo**Bar Baz___",
+				"foo_bar-baz",
+			},
+			Want: []string{
+				"",
+				".",
+				".Foo.Bar.Baz.",
+				"foo.bar-baz",
+			},
+		},
+		{
+			Name: "KebabCase",
+			Fn:   KebabCase,
+			In: []string{
+				"",
+				"_______*****()",
+				" Foo**Bar Baz___",
+				"foo_bar-baz",
+			},
+			Want: []string{
+				"",
+				"-",
+				"-Foo-Bar-Baz-",
+				"foo-bar-baz",
+			},
+		},
+	}
+
+	for _, c := range cases {
+		c := c
+		t.Run(c.Name, func(t *testing.T) {
+			got := make([]string, len(c.In))
+			for i, in := range c.In {
+				got[i] = c.Fn(in)
+			}
+			if diff := cmp.Diff(c.Want, got); diff != "" {
+				t.Fatalf("%s conversion produced unexpected results (-want +got):\n%s", c.Name, diff)
+			}
+		})
+	}
+}

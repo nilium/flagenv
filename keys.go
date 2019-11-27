@@ -37,16 +37,16 @@ func isAlnum(r rune) bool {
 // this by replacing any non-alphanumeric runes with underscores.
 func SnakeCase(name string) string {
 	var last rune = -1
-	runeMap := func(r rune) (m rune) {
+	runeMap := func(r rune) rune {
 		defer func() { last = r }()
 		if isAlnum(r) {
 			return r
 		}
-		m = '_'
-		if last == m {
+		r = '_'
+		if last == r {
 			return -1
 		}
-		return m
+		return r
 	}
 	return strings.Map(runeMap, name)
 }
@@ -55,16 +55,16 @@ func SnakeCase(name string) string {
 // this by replacing any non-alphanumeric runes with dots. Hyphens are preserved
 func DotCase(name string) string {
 	var last rune = -1
-	runeMap := func(r rune) (m rune) {
+	runeMap := func(r rune) rune {
 		defer func() { last = r }()
 		if r == '-' || isAlnum(r) {
 			return r
 		}
-		m = '.'
-		if last == m {
+		r = '.'
+		if last == r {
 			return -1
 		}
-		return m
+		return r
 	}
 	return strings.Map(runeMap, name)
 }
@@ -73,16 +73,16 @@ func DotCase(name string) string {
 // by replacing any non-alphanumeric runes with hyphens.
 func KebabCase(name string) string {
 	var last rune = -1
-	runeMap := func(r rune) (m rune) {
+	runeMap := func(r rune) rune {
 		defer func() { last = r }()
 		if isAlnum(r) {
 			return r
 		}
-		m = '-'
-		if last == m {
+		r = '-'
+		if last == r {
 			return -1
 		}
-		return m
+		return r
 	}
 	return strings.Map(runeMap, name)
 }
