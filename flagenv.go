@@ -1,12 +1,15 @@
 package flagenv
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 )
+
+var errNoLookup = errors.New("no lookup function defined")
 
 // LookupFunc is responsible for querying a config store and returning values for the given key.
 // If a key doesn't exist, the LookupFunc should return an empty slice, not an error (unless a key
@@ -18,7 +21,7 @@ type KeyFunc func(name string) string
 
 // Loader configures a flag loader to use particular Key and Lookup functions.
 //
-// Both the Key and Lookup functions may not be nil. If they are, using the Loader will panic.
+// The Lookup function may not be nil. If it is, it will return an error.
 type Loader struct {
 	Key    KeyFunc
 	Lookup LookupFunc
@@ -98,8 +101,15 @@ func SetMissing(f *flag.FlagSet) error {
 }
 
 func (l *Loader) setFlag(f *flag.FlagSet, fv *flag.Flag) error {
+	if l.Lookup == nil {
+		return errNoLookup
+	}
+	keyfn := l.Key
+	if keyfn == nil {
+		keyfn = Identity
+	}
 	name := fv.Name
-	key := l.Key(name)
+	key := keyfn(name)
 	if key == "" {
 		return nil
 	}

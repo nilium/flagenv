@@ -6,9 +6,12 @@ import (
 	"strconv"
 )
 
+// Used for testing.
+var osLookupEnv = os.LookupEnv
+
 // LookupEnv looks up values for an environment variable of the given key.
 func LookupEnv(key string) (values []string, err error) {
-	v, ok := os.LookupEnv(key)
+	v, ok := osLookupEnv(key)
 	if !ok {
 		return nil, nil
 	}

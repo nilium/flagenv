@@ -5,6 +5,11 @@ import (
 	"unicode"
 )
 
+// Identity is a KeyFunc that returns its input without changes.
+func Identity(key string) string {
+	return key
+}
+
 // WithPrefix returns a KeyFunc that prefixes all keys with the given prefix string before passing
 // them to the keyfn.
 func WithPrefix(prefix string, keyfn KeyFunc) KeyFunc {
