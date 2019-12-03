@@ -43,8 +43,14 @@ func DefaultPrefix() string {
 
 // DefaultLoader returns a Loader with the default configuration for loading environment variables.
 func DefaultLoader() *Loader {
+	return EnvLoader(DefaultPrefix())
+}
+
+// EnvLoader returns a Loader that looks for keys with the given prefix. Keys are expected to be
+// uppercased and separated by underscores. Values are loaded from environment variables.
+func EnvLoader(prefix string) *Loader {
 	return &Loader{
-		Key:    Uppercased(WithPrefix(DefaultPrefix(), SnakeCase)),
+		Key:    Uppercased(WithPrefix(prefix, SnakeCase)),
 		Lookup: WithIndexedLookup(LookupEnv, "_", 1),
 	}
 }
