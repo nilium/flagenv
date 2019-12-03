@@ -74,6 +74,12 @@ func TestLoader(t *testing.T) {
 		"APP_BOOL": "0",
 		"APP_STRS": "x",
 
+		// Dot loader:
+		"app.int":    "256",
+		"app.bool":   "0",
+		"app.strs-1": "x",
+		"app.strs-2": "y",
+
 		// Kebab-case:
 		"app-int":    "256",
 		"app-bool":   "0",
@@ -161,6 +167,21 @@ func TestLoader(t *testing.T) {
 				Bool: false,
 				Str:  "Foobar",
 				Strs: StringSlice{"1", "2"},
+			},
+		},
+
+		// DotLoader:
+		{
+			Name: "DotLoader",
+			Args: []string{
+				"-Bool",
+			},
+			SetFn:  (*Loader).SetMissing,
+			Loader: DotLoader("app.", LookupMapValue(simpleEnv)),
+			Want: Flags{
+				Int:  256,
+				Bool: true,
+				Strs: StringSlice{"x", "y"},
 			},
 		},
 

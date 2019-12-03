@@ -55,6 +55,16 @@ func EnvLoader(prefix string) *Loader {
 	}
 }
 
+// DotLoader returns a Loader that looks for lowercased dot-separated keys with a given prefix.
+// Keys can be defined with -1, -2, etc. suffixes if the key itself isn't defined as well.
+// A lookup function must be provided.
+func DotLoader(prefix string, lookup LookupFunc) *Loader {
+	return &Loader{
+		Key:    Lowercased(WithPrefix(prefix, DotCase)),
+		Lookup: WithIndexedLookup(lookup, "-", 1),
+	}
+}
+
 // defaultLoader is a static copy of the default flag loader.
 var defaultLoader = DefaultLoader()
 
